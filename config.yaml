@@ -1,0 +1,77 @@
+# Anti-Scam AI Configuration
+
+# Model Settings
+model:
+  text_model: "bert-base-uncased"
+  speech_model: "wav2vec2-base"
+  max_text_length: 512
+  sample_rate: 16000
+  confidence_threshold: 0.7
+
+# Text Analysis Settings
+text_analysis:
+  enable_urgency_detection: true
+  enable_financial_keywords: true
+  enable_impersonation_detection: true
+  enable_link_detection: true
+  enable_sentiment_analysis: true
+  keywords_file: "data/keywords/scam_keywords.json"
+
+# Speech Analysis Settings
+speech_analysis:
+  enable_stress_detection: true
+  enable_speech_rate_analysis: true
+  enable_emotion_detection: true
+  enable_accent_analysis: true
+  speech_window_size: 2048
+  hop_length: 512
+
+# API Settings
+api:
+  host: "0.0.0.0"
+  port: 8000
+  debug: false
+  cors_origins: ["*"]
+  max_upload_size: 52428800  # 50MB
+
+# Database Settings
+database:
+  engine: "postgresql"
+  host: "localhost"
+  port: 5432
+  username: "scam_user"
+  password: "secure_password"
+  database: "anti_scam_ai"
+  pool_size: 10
+
+# Logging Settings
+logging:
+  level: "INFO"
+  format: "json"
+  file: "logs/anti_scam_ai.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5
+
+# Training Settings
+training:
+  batch_size: 32
+  epochs: 10
+  learning_rate: 0.0001
+  validation_split: 0.2
+  early_stopping_patience: 3
+  optimizer: "adam"
+
+# Cache Settings
+cache:
+  enabled: true
+  ttl: 3600  # 1 hour
+  backend: "redis"
+  redis_url: "redis://localhost:6379"
+
+# Security Settings
+security:
+  require_api_key: true
+  api_key_header: "X-API-Key"
+  rate_limit_requests: 100
+  rate_limit_period: 3600
+  allowed_file_types: [".wav", ".mp3", ".txt", ".pdf"]
