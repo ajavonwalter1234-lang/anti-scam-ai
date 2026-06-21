@@ -25,6 +25,26 @@ Anti-Scam AI is a comprehensive security tool designed to detect and prevent sca
 - **Cache**: Redis
 - **API Framework**: High-performance API with CORS support and rate limiting.
 
+## Architecture Overview
+
+The system is designed as a modular API-driven platform:
+
+1.  **Inbound API Gateway**: Handles incoming requests, enforces rate limiting, and validates API keys.
+2.  **Multi-Modal Analysis Engine**: Orchestrates the detection process by routing data to specialized processors.
+    -   **Text Processor**: Leverages BERT to analyze urgency, sentiment, and impersonation attempts.
+    -   **Speech Processor**: Utilizes Wav2Vec2 for speech analysis including stress and emotion detection.
+3.  **Persistence & Cache Layer**:
+    -   **PostgreSQL**: Stores logs, results, and configuration data.
+    -   **Redis**: Provides high-speed caching for real-time processing performance.
+
+## Future Roadmap
+
+- [ ] **Real-time Streaming**: Implement WebSockets for live audio and text analysis.
+- [ ] **Multi-language Support**: Extend detection capabilities to a broader range of languages.
+- [ ] **Containerization**: Provide Docker and Kubernetes configurations for simplified deployment.
+- [ ] **Admin Dashboard**: A visual interface for monitoring system performance and scam statistics.
+- [ ] **Browser Extension**: Real-time phishing and scam detection for web browsers.
+
 ## Project Structure
 
 - `config.yaml`: Central configuration for model settings, database, API, and analysis parameters.
