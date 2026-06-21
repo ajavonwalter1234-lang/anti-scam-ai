@@ -6,14 +6,14 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from gmail_service import GmailService
 
-def main():
-    """Example of using the GmailService class."""
-    print("Initializing Gmail Service...")
-    gmail = GmailService()
+def run_demo(sandbox=False):
+    mode_name = "SANDBOX" if sandbox else "REAL"
+    print(f"\n--- Starting Gmail Service Demo ({mode_name} MODE) ---")
+
+    gmail = GmailService(sandbox_mode=sandbox)
 
     try:
         print("Authenticating...")
-        # Note: This will fail if credentials.json is not present
         gmail.authenticate()
 
         print("\nFetching Labels:")
@@ -32,6 +32,8 @@ def main():
                 snippet = full_msg.get('snippet', 'No snippet available')
                 print(f"Message ID: {msg['id']}")
                 print(f"Snippet: {snippet}")
+                body = gmail.get_message_body(full_msg)
+                print(f"Body length: {len(body)} characters")
                 print("-" * 20)
 
     except FileNotFoundError as e:
@@ -39,6 +41,14 @@ def main():
         print("Please make sure you have followed the instructions in README.md to get your credentials.json file.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
+def main():
+    """Example of using the GmailService class."""
+    # Run sandbox demo by default to ensure it works without real credentials
+    run_demo(sandbox=True)
+
+    # In a real environment, you'd run:
+    # run_demo(sandbox=False)
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ from googleapiclient.errors import HttpError
 class GmailService:
     """A service class to interact with the Gmail API."""
 
-    def __init__(self, credentials_path=None, token_path=None, scopes=None, config_path='config.yaml'):
+    def __init__(self, credentials_path=None, token_path=None, scopes=None, config_path='config.yaml', access_token=None, sandbox_mode=False):
         # Try to load from config if not provided
         config = {}
         if os.path.exists(config_path):
@@ -24,26 +24,47 @@ class GmailService:
         self.credentials_path = credentials_path or config.get('credentials_path', 'credentials.json')
         self.token_path = token_path or config.get('token_path', 'token.json')
         self.scopes = scopes or config.get('scopes', ['https://www.googleapis.com/auth/gmail.readonly'])
+        self.access_token = access_token or config.get('access_token', None)
+        self.sandbox_mode = sandbox_mode or config.get('sandbox_mode', False)
         self.service = None
 
     def authenticate(self):
         """Authenticates the user and returns the Gmail API service object."""
+        if self.sandbox_mode:
+            print("Running in Sandbox Mode. Skipping actual authentication.")
+            return None
+
         creds = None
-        if os.path.exists(self.token_path):
+
+        # Priority 1: Manual Access Token
+        if self.access_token:
+            creds = Credentials(self.access_token)
+            print("Using manual access token for authentication.")
+
+        # Priority 2: Token file
+        elif os.path.exists(self.token_path):
             creds = Credentials.from_authorized_user_file(self.token_path, self.scopes)
 
+        # Handle invalid/expired credentials
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
+                try:
+                    creds.refresh(Request())
+                except Exception as e:
+                    print(f"Failed to refresh token: {e}. Falling back to OAuth flow.")
+                    creds = None
+
+            if not creds:
                 if not os.path.exists(self.credentials_path):
                     raise FileNotFoundError(f"Credentials file not found at {self.credentials_path}. "
                                             "Please refer to README.md for instructions on how to obtain it.")
                 flow = InstalledAppFlow.from_client_secrets_file(self.credentials_path, self.scopes)
                 creds = flow.run_local_server(port=0)
 
-            with open(self.token_path, 'w') as token:
-                token.write(creds.to_json())
+            # Save the credentials for the next run (unless it was a manual token)
+            if not self.access_token:
+                with open(self.token_path, 'w') as token:
+                    token.write(creds.to_json())
 
         try:
             self.service = build('gmail', 'v1', credentials=creds)
@@ -54,6 +75,9 @@ class GmailService:
 
     def list_messages(self, user_id='me', query='', max_results=10):
         """Lists messages in the user's mailbox matching the query."""
+        if self.sandbox_mode:
+            return self._simulated_messages(max_results)
+
         if not self.service:
             self.authenticate()
 
@@ -66,6 +90,9 @@ class GmailService:
 
     def get_message(self, message_id, user_id='me', format='full'):
         """Gets a specific message by ID."""
+        if self.sandbox_mode:
+            return self._simulated_message_details(message_id)
+
         if not self.service:
             self.authenticate()
 
@@ -105,6 +132,9 @@ class GmailService:
 
     def list_labels(self, user_id='me'):
         """Lists labels in the user's mailbox."""
+        if self.sandbox_mode:
+            return [{'name': 'INBOX'}, {'name': 'TRASH'}, {'name': 'SPAM'}]
+
         if not self.service:
             self.authenticate()
 
@@ -114,3 +144,20 @@ class GmailService:
         except HttpError as error:
             print(f"An error occurred while listing labels: {error}")
             return []
+
+    def _simulated_messages(self, max_results):
+        """Returns simulated message list for sandbox mode."""
+        return [{'id': f'sim_{i}', 'threadId': f'thread_{i}'} for i in range(max_results)]
+
+    def _simulated_message_details(self, message_id):
+        """Returns simulated message details for sandbox mode."""
+        return {
+            'id': message_id,
+            'snippet': f"This is a simulated message snippet for {message_id}.",
+            'payload': {
+                'mimeType': 'text/plain',
+                'body': {
+                    'data': base64.urlsafe_b64encode(f"Full body of simulated message {message_id}.".encode('utf-8')).decode('utf-8')
+                }
+            }
+        }

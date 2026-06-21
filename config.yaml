@@ -73,6 +73,8 @@ gmail:
   credentials_path: "credentials.json"
   token_path: "token.json"
   scopes: ["https://www.googleapis.com/auth/gmail.readonly"]
+  access_token: null  # Manual override to bypass OAuth flow
+  sandbox_mode: false  # Enable simulated data for development
 
 # Security Settings
 security:
