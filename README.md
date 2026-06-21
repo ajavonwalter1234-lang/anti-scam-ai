@@ -56,6 +56,15 @@ Customize the application behavior by editing `config.yaml`. Key settings includ
 - Rate limiting enabled to prevent abuse.
 - Support for multiple file types: `.wav`, `.mp3`, `.txt`, `.pdf`.
 
+## Related Projects
+
+Here are some related open-source projects and resources in the field of AI-driven scam detection and multi-modal analysis:
+
+- **[MultiModal_Scam_Detct](https://github.com/Codexx121/MultiModal_Scam_Detct)**: A multi-modal system that detects scam phone calls by analyzing both audio and text using a fusion of deep learning models.
+- **[BlockSafe](https://github.com/bhargava562/block-safe)**: An autonomous cognitive firewall that fingerprints text-based scam strategies in real time using multimodal AI and voice intelligence.
+- **[Fraud Detection Engine](https://github.com/dionysc/fraud-detection-engine)**: A mobile-first fraud detection engine for identifying phishing, scam messages, and malicious links with explainable risk analysis.
+- **[Nuvoice Fraud Detection API](https://github.com/nuvoice-ai/fraud-detection-api)**: A REST API to protect voice login and authentication systems against AI-generated voice fraud.
+
 ## License
 
 [Add License Information Here]
