@@ -83,22 +83,29 @@ class GmailService:
             self.persistence = LocalPersistence()
         print("Local Sandbox Mode initialized.")
 
-    def sign_in_as_guest(self):
+    def sign_in_as_guest(self, launch_terminal=False):
         """Simulates 'Sign in as Guest' by instantly booting into sandbox mode."""
         print("Guest Sign-In detected. Bypassing Firebase/Google handshake.")
         self.enable_sandbox_mode()
+        if launch_terminal:
+            try:
+                from .terminal_app import TerminalApp
+            except ImportError:
+                from terminal_app import TerminalApp
+            app = TerminalApp(sandbox_mode=True)
+            app.run()
 
     def list_messages(self, user_id='me', query='', max_results=10):
         """Lists messages in the user's mailbox matching the query."""
+        if not self.service and not self.sandbox_mode:
+            self.authenticate()
+
         if self.sandbox_mode:
             print("Running in Sandbox Mode: Returning simulated messages.")
             return self.persistence.get('messages', [
                 {'id': 'msg_1', 'threadId': 'thread_1'},
                 {'id': 'msg_2', 'threadId': 'thread_2'}
             ])
-
-        if not self.service:
-            self.authenticate()
 
         try:
             results = self.service.users().messages().list(userId=user_id, q=query, maxResults=max_results).execute()
@@ -109,6 +116,9 @@ class GmailService:
 
     def get_message(self, message_id, user_id='me', format='full'):
         """Gets a specific message by ID."""
+        if not self.service and not self.sandbox_mode:
+            self.authenticate()
+
         if self.sandbox_mode:
             print(f"Running in Sandbox Mode: Returning simulated message {message_id}.")
             simulated_messages = self.persistence.get('messages_content', {
@@ -116,9 +126,6 @@ class GmailService:
                 'msg_2': {'id': 'msg_2', 'snippet': 'Hello from your bank', 'payload': {'mimeType': 'text/plain', 'body': {'data': 'SGVsbG8sIHRoaXMgaXMgbm90IGEgc2NhbS4='}}}
             })
             return simulated_messages.get(message_id)
-
-        if not self.service:
-            self.authenticate()
 
         try:
             return self.service.users().messages().get(userId=user_id, id=message_id, format=format).execute()
@@ -156,8 +163,14 @@ class GmailService:
 
     def list_labels(self, user_id='me'):
         """Lists labels in the user's mailbox."""
-        if not self.service:
+        if not self.service and not self.sandbox_mode:
             self.authenticate()
+
+        if self.sandbox_mode:
+            print("Running in Sandbox Mode: Returning simulated labels.")
+            return self.persistence.get('labels', [
+                {'name': 'INBOX'}, {'name': 'SPAM'}, {'name': 'TRASH'}
+            ])
 
         try:
             results = self.service.users().labels().list(userId=user_id).execute()

@@ -41,9 +41,9 @@ gmail_service.authenticate(access_token_override="YOUR_ACCESS_TOKEN_HERE")
 Network constraints blocking Google QUIC connections may also impede standard Firebase handshake requests, causing Guest Sign-In (Anonymous Authentication) to fail.
 
 ### Self-Healing Fallback: Local Sandbox Mode
-Anti-Scam AI now features an automatic fallback protocol. If the application is unable to connect to authentication servers, it will gracefully initialize **Local Sandbox Mode**.
+Anti-Scam AI now features an automatic fallback protocol. If the application is unable to connect to authentication servers (e.g., encountering `ERR_CONNECTION_TIMED_OUT` on `firebaseapp.com`), it will gracefully initialize **Local Sandbox Mode**.
 
-- **Instant Boot**: Clicking "Sign in as Guest" now instantly boots up an operational local terminal environment.
+- **Instant Boot**: Clicking "Sign in as Guest" (or running `python start_sandbox.py`) now instantly boots up an operational local terminal environment.
 - **Simulated Vectors**: Features fully simulated scan vectors and responsive scanner loops.
 - **Local Persistence**: Threat reports, keyword edits, and purged mail sectors are saved seamlessly to local storage (simulated via `data/local_storage.json`).
 
