@@ -70,6 +70,28 @@ Customize the application behavior by editing `config.yaml`. Key settings includ
    ```
 2. (In development) Install dependencies and set up the environment.
 
+### Gmail API Integration
+
+This project includes a Gmail API integration that allows you to fetch and analyze emails for potential scams.
+
+#### Prerequisites
+
+To use the Gmail API integration, you need:
+
+1.  **A Google Cloud Project**: Create it in the [Google Cloud Console](https://console.cloud.google.com/).
+2.  **Enabled Gmail API**: Enable the Gmail API for your project.
+3.  **OAuth 2.0 Credentials**:
+    *   Create "OAuth client ID" of type "Desktop app".
+    *   Download the JSON file and rename it to `credentials.json`.
+    *   Place `credentials.json` in the root directory of this project.
+
+#### Troubleshooting
+
+If you encounter network or protocol issues (e.g., `ERR_QUIC_PROTOCOL_ERROR`), please refer to [NEURAL_LINKS.md](NEURAL_LINKS.md) for solutions, including:
+- Disabling QUIC in Chrome.
+- Using a manual access token override.
+- Automatic fallback to **Local Sandbox Mode**.
+
 ## Security
 
 - API Key authentication required.
