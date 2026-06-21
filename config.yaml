@@ -68,6 +68,12 @@ cache:
   backend: "redis"
   redis_url: "redis://localhost:6379"
 
+# Gmail API Settings
+gmail:
+  credentials_path: "credentials.json"
+  token_path: "token.json"
+  scopes: ["https://www.googleapis.com/auth/gmail.readonly"]
+
 # Security Settings
 security:
   require_api_key: true
