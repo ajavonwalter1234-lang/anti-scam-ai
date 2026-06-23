@@ -35,6 +35,8 @@ In code:
 gmail_service.authenticate(access_token_override="YOUR_ACCESS_TOKEN_HERE")
 ```
 
+**Note:** You can also apply this override directly within the **Local Sandbox Terminal** using the `override <token>` command.
+
 ## 2. Guest Sign-In Failure
 
 ### The Root Cause

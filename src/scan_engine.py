@@ -18,8 +18,12 @@ class ScanEngine:
         r"police department", r"government agency"
     ]
 
-    def __init__(self, confidence_threshold=0.7):
+    def __init__(self, confidence_threshold=0.7, persistence=None):
         self.confidence_threshold = confidence_threshold
+        if persistence:
+            custom_kws = persistence.get('custom_keywords', {'urgency': [], 'financial': []})
+            self.URGENCY_PATTERNS.extend(custom_kws.get('urgency', []))
+            self.FINANCIAL_PATTERNS.extend(custom_kws.get('financial', []))
 
     def scan_text(self, text):
         """Analyzes text for scam indicators."""

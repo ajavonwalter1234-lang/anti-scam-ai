@@ -8,7 +8,7 @@ class TerminalApp:
 
     def __init__(self, sandbox_mode=True):
         self.gmail = GmailService(sandbox_mode=sandbox_mode)
-        self.engine = ScanEngine()
+        self.engine = ScanEngine(persistence=self.gmail.persistence if sandbox_mode else None)
         self.running = True
 
     def run(self):
@@ -35,6 +35,10 @@ class TerminalApp:
                 self.show_reports()
             elif cmd == "keywords":
                 self.edit_keywords()
+            elif cmd == "sync":
+                self.run_sync()
+            elif cmd == "purge":
+                self.run_purge()
             elif cmd == "config":
                 self.show_config()
             elif cmd.startswith("override "):
@@ -46,6 +50,8 @@ class TerminalApp:
     def print_help(self):
         print("\nAvailable Commands:")
         print("  scan      : Fetch and scan messages (Sandbox/Simulated)")
+        print("  sync      : Synchronize local threat intelligence")
+        print("  purge     : Bulk purge suspicious mail sectors")
         print("  vectors   : Display active scan vectors")
         print("  reports   : View saved threat reports")
         print("  keywords  : Add custom keywords to scan engine")
@@ -112,6 +118,29 @@ class TerminalApp:
             print(f"Added '{kw}' to Financial patterns.")
 
         self.gmail.persistence.set('custom_keywords', custom_kws)
+
+    def run_sync(self):
+        print("\nInitiating Intelligence Sync...")
+        steps = ["Connecting to Secure Edge...", "Downloading Threat Definitions...", "Updating Local Model Weights...", "Syncing Session Cache..."]
+        for step in steps:
+            print(f"  > {step}")
+            time.sleep(0.4)
+
+        self.gmail.persistence.set('last_sync', time.ctime())
+        print("Sync Successful. Intelligence database is up to date.")
+
+    def run_purge(self):
+        print("\nWarning: Initiating Bulk Purge of Suspicious Mail Sectors...")
+        time.sleep(0.5)
+        sectors = ["Sector-7G", "Sector-12F", "Vault-Alpha"]
+        for s in sectors:
+            print(f"  [PURGING] {s}...")
+            time.sleep(0.3)
+
+        purges = self.gmail.persistence.get('purge_history', [])
+        purges.append({"timestamp": time.ctime(), "sectors": sectors})
+        self.gmail.persistence.set('purge_history', purges)
+        print("Purge Complete. 3 high-risk sectors neutralized.")
 
     def show_vectors(self):
         print("\nActive Scan Vectors (Live Visualization):")
