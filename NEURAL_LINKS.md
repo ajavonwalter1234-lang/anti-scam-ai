@@ -45,7 +45,7 @@ Network constraints blocking Google QUIC connections may also impede standard Fi
 ### Self-Healing Fallback: Local Sandbox Mode
 Anti-Scam AI now features an automatic fallback protocol. If the application is unable to connect to authentication servers (e.g., encountering `ERR_CONNECTION_TIMED_OUT` on `firebaseapp.com`), it will gracefully initialize **Local Sandbox Mode**.
 
-- **Instant Boot**: Clicking "Sign in as Guest" (or running `python start_sandbox.py`) now instantly boots up an operational local terminal environment.
+- **Instant Boot**: Clicking "Sign in as Guest" (or running `python anti_scam_ai_portable.py`) now instantly boots up an operational local terminal environment.
 - **Simulated Vectors**: Features fully simulated scan vectors and responsive scanner loops.
 - **Local Persistence**: Threat reports, keyword edits, and purged mail sectors are saved seamlessly to local storage (simulated via `data/local_storage.json`).
 

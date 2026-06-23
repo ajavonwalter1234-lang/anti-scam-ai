@@ -90,7 +90,7 @@ To use the Gmail API integration, you need:
 If you encounter network or protocol issues (e.g., `ERR_QUIC_PROTOCOL_ERROR` or `ERR_CONNECTION_TIMED_OUT` on Firebase), please refer to [NEURAL_LINKS.md](NEURAL_LINKS.md) for solutions, including:
 - Disabling QUIC in Chrome.
 - Using a manual access token override.
-- Running the **Local Sandbox Mode** via `python start_sandbox.py`.
+- Running the **Local Sandbox Mode** via `python start_sandbox.py` or using the **All-in-One Portable Script** `python anti_scam_ai_portable.py`.
 
 ## Security
 
