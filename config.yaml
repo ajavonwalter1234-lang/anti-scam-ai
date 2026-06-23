@@ -75,3 +75,11 @@ security:
   rate_limit_requests: 100
   rate_limit_period: 3600
   allowed_file_types: [".wav", ".mp3", ".txt", ".pdf"]
+
+# Gmail API Settings
+gmail:
+  credentials_path: "credentials.json"
+  token_path: "token.json"
+  scopes: ["https://www.googleapis.com/auth/gmail.readonly"]
+  access_token: null  # Set this to manually override OAuth (Neural Links Troubleshooting)
+  sandbox_mode: false # Set to true to force Local Sandbox Mode
