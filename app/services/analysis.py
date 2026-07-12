@@ -7,6 +7,11 @@ from app.rag.vector_store import VectorStore
 from app.llm.adapter import call_llm
 
 
+# Default prompt sizing configuration
+DEFAULT_PROMPT_MAX_CHARS = int(os.getenv("PROMPT_MAX_CHARS", "4000"))
+DEFAULT_PER_EXAMPLE_CHARS = int(os.getenv("PER_EXAMPLE_MAX_CHARS", "800"))
+
+
 def query_vector_store(text: str, top_k: int = 3) -> Dict[str, Any]:
     """Query the local vector store and return matches along with optional metadata."""
     vs = VectorStore()
@@ -41,7 +46,7 @@ async def analyze_text_with_rag(user_text: str) -> Dict[str, Any]:
     """
     Complete text analysis that:
       1. Queries the vector store for relevant context
-      2. Builds a grounded prompt using middleware
+      2. Builds a grounded prompt using middleware (with prompt-size guarding)
       3. Calls the configured LLM adapter with the augmented prompt
       4. Returns a structured response including rag matches and the debug prompt
     """
@@ -49,8 +54,10 @@ async def analyze_text_with_rag(user_text: str) -> Dict[str, Any]:
     rag_results = query_vector_store(user_text, top_k=3)
     rag_matches = rag_results.get("matches", []) if rag_results else []
 
-    # 2) Build grounded prompt
-    grounded_prompt = build_grounded_prompt(user_text, rag_matches)
+    # 2) Build grounded prompt with size guards
+    max_chars = int(os.getenv("PROMPT_MAX_CHARS", DEFAULT_PROMPT_MAX_CHARS))
+    per_example_chars = int(os.getenv("PER_EXAMPLE_MAX_CHARS", DEFAULT_PER_EXAMPLE_CHARS))
+    grounded_prompt = build_grounded_prompt(user_text, rag_matches, max_prompt_chars=max_chars, per_example_max_chars=per_example_chars)
 
     # 3) Call LLM adapter
     llm_output = call_llm(grounded_prompt)
