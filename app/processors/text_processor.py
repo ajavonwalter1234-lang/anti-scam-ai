@@ -15,6 +15,30 @@ try:
 except Exception:
     KEYWORDS = ["urgent", "bank", "password", "transfer", "win", "prize", "click", "verify", "update"]
 
+# Try to import the local vector store for RAG
+try:
+    from app.rag.vector_store import VectorStore
+    _VECTOR_STORE_AVAILABLE = True
+except Exception:
+    VectorStore = None
+    _VECTOR_STORE_AVAILABLE = False
+
+# Initialize a global vector store instance lazily
+_vector_store_instance = None
+
+def _get_vector_store():
+    global _vector_store_instance
+    if not _VECTOR_STORE_AVAILABLE:
+        return None
+    if _vector_store_instance is None:
+        try:
+            _vector_store_instance = VectorStore()
+            if _vector_store_instance.disabled:
+                _vector_store_instance = None
+        except Exception:
+            _vector_store_instance = None
+    return _vector_store_instance
+
 
 def analyze_text(text: str) -> Dict[str, Any]:
     text_lower = text.lower()
@@ -38,10 +62,28 @@ def analyze_text(text: str) -> Dict[str, Any]:
     if has_link:
         explanation.append("Contains a URL or link-like string")
 
-    return {
+    result: Dict[str, Any] = {
         "scam_score": round(score, 3),
         "matches": matches,
         "urgency": urgency,
         "has_link": has_link,
         "explanation": explanation,
     }
+
+    # RAG: consult local vector store if available and add rag_matches to the result
+    vs = _get_vector_store()
+    if vs is not None:
+        try:
+            rag_hits = vs.query(text, k=5)
+            # rag_hits is list of tuples (id, text, score)
+            rag_matches = [
+                {"id": h[0], "text": h[1], "score": round(h[2], 3)} for h in rag_hits
+            ]
+            result["rag_matches"] = rag_matches
+        except Exception:
+            # silently ignore RAG failures in prototype
+            result["rag_matches"] = []
+    else:
+        result["rag_matches"] = []
+
+    return result
