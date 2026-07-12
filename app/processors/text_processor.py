@@ -1,6 +1,6 @@
 import json
 import os
-from typing import Dict, Any, List
+from typing import Dict, Any
 
 from ..config import get_config
 
@@ -40,7 +40,12 @@ def _get_vector_store():
     return _vector_store_instance
 
 
-def analyze_text(text: str) -> Dict[str, Any]:
+def analyze_text(text: str, external_rag_matches: Optional[list] = None) -> Dict[str, Any]:
+    """Analyze text for scam indicators. Optionally accept external_rag_matches to avoid
+    re-querying the vector store when the caller already fetched matches.
+
+    external_rag_matches should be a list of tuples (id, text, score).
+    """
     text_lower = text.lower()
     matches = [k for k in KEYWORDS if k.lower() in text_lower]
 
@@ -70,20 +75,24 @@ def analyze_text(text: str) -> Dict[str, Any]:
         "explanation": explanation,
     }
 
-    # RAG: consult local vector store if available and add rag_matches to the result
-    vs = _get_vector_store()
-    if vs is not None:
+    # RAG: if external matches provided use them, else consult vector store
+    rag_matches = []
+    if external_rag_matches is not None:
         try:
-            rag_hits = vs.query(text, k=5)
-            # rag_hits is list of tuples (id, text, score)
             rag_matches = [
-                {"id": h[0], "text": h[1], "score": round(h[2], 3)} for h in rag_hits
+                {"id": h[0], "text": h[1], "score": round(h[2], 3)} for h in external_rag_matches
             ]
-            result["rag_matches"] = rag_matches
         except Exception:
-            # silently ignore RAG failures in prototype
-            result["rag_matches"] = []
+            rag_matches = []
     else:
-        result["rag_matches"] = []
+        vs = _get_vector_store()
+        if vs is not None:
+            try:
+                hits = vs.query(text, k=5)
+                rag_matches = [{"id": h[0], "text": h[1], "score": round(h[2], 3)} for h in hits]
+            except Exception:
+                rag_matches = []
+
+    result["rag_matches"] = rag_matches
 
     return result

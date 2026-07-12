@@ -6,6 +6,7 @@ import shutil
 from .config import get_config
 from .processors.text_processor import analyze_text
 from .processors.speech_processor import analyze_audio
+from .rag.context import get_rag_context
 
 app = FastAPI(title="Anti-Scam AI - Prototype")
 config = get_config()
@@ -34,8 +35,21 @@ async def health():
 
 @app.post("/analyze/text")
 async def analyze_text_endpoint(payload: TextRequest, x_api_key: str = Depends(require_api_key)):
-    result = analyze_text(payload.text)
-    return JSONResponse(content={"input": payload.text, "analysis": result})
+    # First, fetch top-k RAG matches and build an augmented input for grounding
+    rag_matches, context_string = get_rag_context(payload.text, k=3)
+
+    augmented_input = None
+    if context_string:
+        augmented_input = f"Retrieved context:\n{context_string}\nOriginal message:\n{payload.text}"
+        # Call analyze_text with augmented input and pass the rag_matches we already fetched to avoid double querying
+        result = analyze_text(augmented_input, external_rag_matches=rag_matches)
+    else:
+        result = analyze_text(payload.text)
+
+    response = {"input": payload.text, "analysis": result}
+    if augmented_input:
+        response["augmented_input"] = augmented_input
+    return JSONResponse(content=response)
 
 
 @app.post("/analyze/audio")
