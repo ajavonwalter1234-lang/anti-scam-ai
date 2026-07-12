@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ex-1",
+    "title": "Bank account verification scam",
+    "text": "We detected suspicious activity on your bank account. Verify your account immediately at http://secure-bank.verify.example and provide your account number and password.",
+    "source": "user_report",
+    "date": "2026-06-20"
+  },
+  {
+    "id": "ex-2",
+    "title": "Fake invoice PDF",
+    "text": "Please find attached invoice INV-0923. Click the link to view and pay immediately to avoid penalties.",
+    "source": "open_web",
+    "date": "2026-06-21"
+  },
+  {
+    "id": "ex-3",
+    "title": "Prize/phishing text",
+    "text": "Congratulations! You have won a prize. Send your UPI ID or a small verification transfer of $1 to claim the reward.",
+    "source": "user_report",
+    "date": "2026-06-22"
+  }
+]
