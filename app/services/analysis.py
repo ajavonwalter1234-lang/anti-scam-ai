@@ -4,7 +4,7 @@ from typing import Dict, Any, List, Tuple
 
 from app.rag.middleware import build_grounded_prompt
 from app.rag.vector_store import VectorStore
-from app.processors.text_processor import analyze_text as rule_analyze_text
+from app.llm.adapter import call_llm
 
 
 def query_vector_store(text: str, top_k: int = 3) -> Dict[str, Any]:
@@ -42,7 +42,7 @@ async def analyze_text_with_rag(user_text: str) -> Dict[str, Any]:
     Complete text analysis that:
       1. Queries the vector store for relevant context
       2. Builds a grounded prompt using middleware
-      3. Calls the existing rule-based analyzer (or an LLM) with the augmented prompt
+      3. Calls the configured LLM adapter with the augmented prompt
       4. Returns a structured response including rag matches and the debug prompt
     """
     # 1) Retrieve RAG matches
@@ -52,23 +52,24 @@ async def analyze_text_with_rag(user_text: str) -> Dict[str, Any]:
     # 2) Build grounded prompt
     grounded_prompt = build_grounded_prompt(user_text, rag_matches)
 
-    # 3) For the prototype, use the rule-based text analyzer on the grounded prompt.
-    # The analyzer accepts external_rag_matches as a list of tuples (id, text, score), so prepare that.
-    external_rag_tuples: List[Tuple[str, str, float]] = [
-        (m.get("id"), m.get("text"), float(m.get("score", 0.0))) for m in rag_matches
-    ]
+    # 3) Call LLM adapter
+    llm_output = call_llm(grounded_prompt)
 
-    model_response = rule_analyze_text(grounded_prompt, external_rag_matches=external_rag_tuples)
+    # Normalize output to expected fields
+    scam_score = llm_output.get("scam_score")
+    explanation = llm_output.get("explanation") or []
 
-    # 4) Construct the unified response
     response = {
-        "scam_score": model_response.get("scam_score"),
-        "explanation": model_response.get("explanation"),
+        "scam_score": scam_score,
+        "explanation": explanation,
         "rag_matches": rag_matches,
         "debug_prompt": grounded_prompt,
+        "_llm_raw": llm_output.get("raw"),
     }
 
-    # include raw model_response for debug if needed
-    response["_model_response"] = model_response
+    # include any extra LLM fields (suggestions, etc.)
+    for k in ("suggestions",):
+        if k in llm_output:
+            response[k] = llm_output[k]
 
     return response
