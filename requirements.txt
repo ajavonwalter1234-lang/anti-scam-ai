@@ -4,7 +4,12 @@ pydantic>=1.10.0
 pyyaml>=6.0
 python-multipart>=0.0.6
 
-# Optional (heavy) ML deps for later when you want real model-backed processors:
-# transformers>=4.0.0
-# torch>=1.13.0
-# torchaudio>=0.13.0
+# Real model-backed processors
+openai-whisper>=20230314
+transformers>=4.30.0
+torch>=1.13.0
+torchaudio>=0.13.0
+librosa>=0.9.2
+soundfile>=0.12.1
+
+# Note: ffmpeg must be installed on the host for Whisper to work.

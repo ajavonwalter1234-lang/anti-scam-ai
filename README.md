@@ -1,57 +1,48 @@
-# Anti-Scam AI — Prototype
+# Anti-Scam AI — Prototype (updated: model-backed processors)
 
-This branch contains a lightweight prototype scaffold implementing a minimal FastAPI service and deterministic (mocked) text/audio processors so you can run and iterate quickly.
+This branch contains a prototype FastAPI service with real-model wiring for transcription and optional audio classification.
 
-What's included
-- app/main.py — FastAPI application with API key header auth and two endpoints: POST /analyze/text and POST /analyze/audio
-- app/processors — prototype implementations:
-  - text_processor.py — keyword + urgency based analysis
-  - speech_processor.py — WAV duration-based stub
-- app/config.py — loads config.yaml (from repo root) and supports simple env overrides
-- data/keywords/scam_keywords.json — starter keyword list referenced by the text processor
-- requirements.txt, Dockerfile, .gitignore
+IMPORTANT system requirements
+- ffmpeg must be installed on the host for Whisper transcription to work.
+  - On Ubuntu: sudo apt-get install -y ffmpeg
+  - On macOS (Homebrew): brew install ffmpeg
+- Installing the ML dependencies (torch, transformers, torchaudio) may take significant time and disk space. For GPU support, install the appropriate torch wheel for your CUDA version.
 
-How this addresses your feature suggestions
-- Real-Time Integration: the FastAPI prototype can be extended with WebSocket endpoints; the main app is structured to add integrations (WhatsApp/Telegram) as separate connectors.
-- RAG / Vector DB: the text processor is pluggable; later you can add a vector-store-backed retrieval step before model inference.
-- Explainability: the text analysis returns explanations and a deterministic "scam_score" so consumers can show why a decision was made.
-- Multi-Modal & Whisper: the speech_processor is a stub with clear notes for replacing it with Whisper or Wav2Vec2.
-- URL/link analysis, phone verification, multi-language, dashboard, privacy — all listed in README as next steps and where to integrate.
+What's new in this update
+- app/processors/speech_processor.py now uses OpenAI Whisper (openai-whisper) to transcribe uploaded WAV files and then runs the existing text analysis on the resulting transcript.
+- If configured (SPEECH_EMOTION_MODEL env var), the code will also use Hugging Face's "audio-classification" pipeline to perform emotion/stress detection on the audio. If not configured or dependencies are missing, a deterministic heuristic is used.
+- requirements.txt now includes the heavy ML dependencies. See notes above for system-level packages.
 
-Run locally
-1. Create a virtual environment and install deps
+Run locally (with models)
+1. Install system deps (ffmpeg) and create venv
 
 ```bash
+# Ubuntu example
+sudo apt-get update && sudo apt-get install -y ffmpeg
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-2. Run the server
+2. (Optional) Configure environment variables
 
 ```bash
-export API_KEY=your-secret-key   # optional for local testing; if unset, server allows requests when debug=true in config.yaml
+export API_KEY=your-secret-key
+export WHISPER_MODEL=small             # whisper model size: tiny, base, small, medium, large
+export SPEECH_EMOTION_MODEL=your-hf-model-id  # optional Hugging Face model id for audio-classification
+```
+
+3. Run the app
+
+```bash
 uvicorn app.main:app --host 0.0.0.0 --port 8000
 ```
 
-3. Try the endpoints
+Notes on models and costs
+- Whisper "large" model gives best accuracy but is heavy. Start with "small" or "base" for development.
+- Hugging Face audio-classification models vary; some are CPU-friendly, others require GPU for reasonable throughput.
 
-- Text analysis
-
-```bash
-curl -X POST "http://localhost:8000/analyze/text" -H "Content-Type: application/json" -H "X-API-Key: $API_KEY" -d '{"text":"You won a prize! Click http://phish.example and verify your account"}'
-```
-
-- Audio analysis (wav only for prototype)
-
-```bash
-curl -X POST "http://localhost:8000/analyze/audio" -H "X-API-Key: $API_KEY" -F "file=@example.wav"
-```
-
-Next steps I can do for you
-- Replace processors with real Hugging Face/Whisper-backed implementations and add the heavy ML dependencies.
-- Add WebSocket endpoints and an example connector for Telegram/WhatsApp.
-- Add Docker Compose and a Postgres/Redis dev stack for local end-to-end testing.
-- Add a simple Next.js or Streamlit dashboard for visualizations and feedback collection.
-
-If you want me to proceed, I can now commit these files to the scaffold/prototype branch (already created) and push them. Would you like me to push now?
+Next steps I can implement for you
+- Add a small orchestration to download/cache large models and prefer CPU/GPU-optimized wheels for torch.
+- Add tests and CI that mock model calls so we can run unit tests without heavy dependencies.
+- Wire the RAG vector-store step (Chroma/FAISS/Pinecone) to augment text analysis with known scam patterns.
