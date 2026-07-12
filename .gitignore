@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+
+# Temporary files
+tmp/
+
+# Python packaging
+dist/
+build/
+
+# Ignore local config overrides
+.env
