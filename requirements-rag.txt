@@ -1,0 +1,6 @@
+# Add RAG dependencies for local vector store
+sentence-transformers>=2.2.2
+faiss-cpu>=1.7.4
+numpy>=1.24.0
+
+# Note: faiss-cpu can be platform-specific; if installation issues arise, consider using Chroma or a hosted vector DB.
